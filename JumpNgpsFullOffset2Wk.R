@@ -40,7 +40,7 @@ jumpNgps <- as.data.frame.data.frame(jumpNgps)
 #write.table(jumpNgps, file = "C:/Users/Nick.Lewis/OneDrive - Inter Miami CF/R Data/gpsnormalizedTrial2.csv",
 #            row.names = FALSE, col.names = TRUE, sep = ",")
 
-#######-------------------------------------------------------------------------------------------------
+####### Create Splits and First Recipe Iteration---------------------------------------------------------------------------------
 jumpNgps <- jumpNgps%>%
         select(-full_name, -week_2_base, -year_1, -ID)
 
@@ -61,6 +61,8 @@ jump_recipe%>%
         prep()%>%
         bake(new_data = NULL)
 
+####### Create tree tuning model parameters-------------------------------------------------------------------------------
+
 tree_model <- decision_tree(
         cost_complexity = tune(),
         tree_depth = tune(),
@@ -79,6 +81,9 @@ cv_folds <- vfold_cv(jump_train, v = 10)
 
 doParallel::registerDoParallel(cores = 3)
 set.seed(5867)
+
+###### Fit model and collect information about fit -----------------------------------------------------------------
+
 model_fit <- tune_grid(
         tree_model,
         jump_recipe,
@@ -94,11 +99,15 @@ tree_final <- finalize_model(tree_model, select_best(model_fit, "rmse"))
 
 fit_train <- fit(tree_final, ft_c_tdiff_fatigue_current ~ ., jump_train)
 
+###### Show the Tree Plot ----------------------------------------------------------------------------------
+
 library(rpart.plot)
 
 fit_train %>%
         extract_fit_engine() %>%
         rpart.plot()
+
+###### Look at variable importance ----------------------------------------------------------------
 
 library(vip)
 
@@ -109,6 +118,9 @@ fit_train %>%
                     color = "black",
                     fill = "palegreen",
                     alpha = 0.5))
+
+###### Fit predicted vs actual to see %difference in FT:CT ------------------------------------------------
+
 
 fit_test <- last_fit(tree_final, ft_c_tdiff_fatigue_current ~ .,jump_split)
 

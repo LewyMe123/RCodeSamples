@@ -4,19 +4,19 @@ library(lubridate)
 library(ggplot2)
 library(purrr)
 
-setwd("C:/Users/Nick.Lewis/OneDrive - Inter Miami CF/Jumps 2022/Daily Jumps/Raw Jump Trials")
+setwd("C:/Users/Nick.Lewis/OneDrive - Nick.Lewis/Jumps 2022/Daily Jumps/Raw Jump Trials")
 
 directory <- getwd()
 files_list <- list.files(path = directory, pattern = ".csv", full.names = TRUE)
 
-clubData <- files_list %>%
+clubJumps <- files_list %>%
         map_df(.x = ., .f = function(.x){
                 directory <- getwd()
-                Nick_Jump <- read_csv(.x, skip = 9, col_select = c(1,2,3,5,6,7,8,9))
-                Nick_Vitals <- read_csv(.x, n_max = 1)
+                Player_Jump <- read_csv(.x, skip = 9, col_select = c(1,2,3,5,6,7,8,9))
+                Player_Vitals <- read_csv(.x, n_max = 1)
                 
                 
-                Nick_Round2 <- Nick_Jump %>%
+                Jump_Round2 <- Player_Jump %>%
                         mutate(Time = round(as.numeric(Time), 2))%>%
                         group_by(Time) %>%
                         summarize_at(vars(Left:Impulse), .funs = mean) %>%
@@ -40,14 +40,14 @@ clubData <- files_list %>%
                 
                 colnames(FileName)[1] <- "FileName"
                 
-                Vitals_Weight <- Nick_Vitals %>%
+                Vitals_Weight <- Player_Vitals %>%
                         select(2) %>%
                         slice(1) %>%
                         unlist(., use.names = FALSE)
                 
                 Vitals_All <- data.frame(FileName, Vitals_Weight)
                 
-                Nick_Binded_Final <- bind_cols(Vitals_All, Nick_Round2) %>%
+                Player_Binded_Final <- bind_cols(Vitals_All, Jump_Round2) %>%
                         separate(col = FileName, into = c("Name", "Jump_Type", "Date", "TimeofDay", "Trial"),
                                  sep = "-") %>%
                         mutate(Date = ymd(Date),
@@ -57,7 +57,7 @@ clubData <- files_list %>%
                 
         })
 
-write.table(clubData,
-            file = "C:/Users/Nick.Lewis/OneDrive - Inter Miami CF/Jumps 2022/RawJumpTrials.csv",
+write.table(clubJump,
+            file = "C:/Users/Nick.Lewis/OneDrive - Nick.Lewis/Jumps 2022/RawJumpTrials.csv",
             append = TRUE, row.names = FALSE, col.names = FALSE,  sep = ",")
 

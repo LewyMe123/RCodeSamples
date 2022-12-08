@@ -6,7 +6,7 @@ library(purrr)
 library(janitor)
 library(data.table)
 
-setwd("C:/Users/Nick.Lewis/OneDrive - Inter Miami CF/Nordbord/Raw Trials")
+setwd("C:/Users/Nick.Lewis/OneDrive - Nick.Lewis/Nordbord/Raw Trials")
 
 directory <- getwd()
 files_list <- list.files(path = directory, pattern = ".csv", full.names = TRUE)
